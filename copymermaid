@@ -1,0 +1,271 @@
+# Conceptual Design
+
+Update your Initial Study based upon feedback.
+
+Using Appendix B-2 as a guide, create a conceptual design for the system including a list of business rules and an ERD. 
+
+Your conceptual design should use these headings but do not include the descriptive text.
+
+## Information Sources and Users
+
+List all of the data sources and the users that will be interacting with that data. (e.g. Where is the data actually coming from? Who inputs the data into the system? Who needs information from the system?)
+```
+  1. Sources:
+      *For the catalogs and degree requirements, we will use the already existing catalogs and degree requirements defined by the institution.
+      *For students, we will use their transcripts and declared majors to know where they are at in their program. (if no transcript then the program starts at the beginning).
+      *(Add more that I missed)
+  2. Users:
+      *Students: Can access the system to review their academic progress and the remaining degree requirements required to graduate.
+      *Advisors: Can access, review, and modify the student semester schedule according to the degree requirements. 
+```
+
+## User Requirements
+
+Create a bulleted list of user requirements for the system. User requirements are a list of unambiguous features that the users expect the system to accomplish. Once the system is completed, the system shall prove that it fulfills each of the described user requirements. 
+```
+  1. Students:
+       *Should be allowed to review their completed and remaining courses required for their program(s) via a dashboard.
+       *plan courses for future semesters based on remaining requirements.
+  2. Advisors:
+        *Should be allowed to access each student's courses required for their degree(s)
+        *update the student's choices for future semester courses.
+  3. The system itself:
+         *Should send an alert to the advisor and student if the remaining required courses can not be completed before the student's graduation date (Through email).
+             -This is just an add-on if we can get it to work great, if not that's is ok.   
+```   
+
+Typically, user requirements form a contract that the developer must fulfill in order to get paid. Therefore, they need to be as descriptive and explicit as possible. Any ambiguities could lead to either party trying to back out of the deal.
+
+## ERM
+
+Create a list of entities for the system and describe each of them either as a bulleted list or a table.  (e.g. What does the entity represent? What is its purpose? How does it relate to other entities?)
+```
+
+  1. Students
+      A. Can represent a student in the institution but in this case, a student in the CS, IS, or cyberSec departments.
+          *Attributes can include:
+              - int StudentID             PK
+              - string StudentFName
+              - string StudentLName
+              - string StudentEmail
+              - int AdvisorID             FK
+  2. StudentPrograms
+      A. Connects the student and their program of study
+            *Attributes: 
+                - int StudentProgramID            PK
+                -  int StudentID                   FK
+                - int ProgramID                   FK
+  
+  3. Professors
+      A. Represents a Professor who oversees specific students and their progress academically and guides them in taking the required courses for     their program(s).
+          *Attributes:
+              - int ProfessorID             PK
+              - string ProfessorFName
+              - string ProfessorLName
+              - string ProfessorEmail
+              
+ 4. Catalogs
+      A. Represents a collection of courses that the school offers.
+          *Attributes
+              - int CatalogID               PK
+              - string CatalogName
+              - int CatalogYear
+              - string CatalogDescription
+5. ProgramCatalogs
+    A. Connects a program to a catalog
+        *Attributes:
+              - int ProgramCatalogID            PK
+              - int CatalogID                   FK
+              - int ProgramID                   FK
+
+6. Programs
+    A. Represents all the programs that a student can take
+        *Attributes: 
+            - int ProgramID               PK
+            - String ProgramName
+            - string ProgramType
+
+7. ProgramCourses
+    A. Connects a program to a course
+          *Attributes: 
+              - int ProgramCourseID                PK
+              - int ProgramID                       FK
+              - int CoursesID                       FK
+8. Courses
+    A. represents a course offered by the institution
+        *Attributes
+            - int CourseID                        PK
+            - string CourseName
+            - int prerequisite(CourseID)          FK
+
+9. StudentCompletedCourses
+    A. represents all the courses that a student has completed
+        *Attributes:
+            - int StudentCompCourseID           PK
+            - int StudentID                     FK  
+            - int CourseID                      FK
+
+10. Semesters
+      A. This represents the term/semester that courses are offered.
+          *Attributes: 
+            - int SemesterID                      PK
+            - string SemesterName
+            - int SemesterStartDate
+            - int SemesterEndDate
+11. StudentSemesters
+      A. Connects a student to a semester
+          *Attributes: 
+            - int StudentSemesterID           PK
+            - int StudentID                   FK
+            - int SemesterID                  FK
+
+12. Classes
+    A. Represents a specific course offered per semester.
+        *Attributes:
+          - int ClassID                     PK
+          - int SemesterID                  FK
+          - int CourseID                    FK
+
+```
+
+## Business Rules
+
+Create a bulleted list of business rules. We are still at a fairly high level of abstraction. You should only be concerned about entities, relationships, primary and foreign keys at this point.
+
+- A student can have multiple programs and a program can have multiple students in them.
+- A student can enroll in multiple semesters and a semester can have multiple students enroll in it.
+- A student can have zero to multiple courses completed and a course can have multiple students taking it.
+
+- A catalog can have multiple students using it.
+- A catalog can include multiple Programs and a program can use multiple catalogs
+
+- A Course can have zero to multiple prerequisite courses
+- A course can be included in multiple programs and a program can have multiple courses
+- A course can be in multiple semesters and a semester can have multiple courses
+
+- A professor can advise multiple students but a student can only have one adviser.
+- A professor can teach multiple courses but a course can only be taught by one Professor. 
+
+## ERD
+
+Create an ERD from your business rules and insert it here. Include all entities, attributes with generic data types, relationships (optional or required), primary and foreign keys. 
+
+MermaidJS is highly recommended since it is built into GitHub, but you can use any software you wish to create the ERD. The `0-Markdown.md` file gives examples of how to embed an image or Mermaid diagram in a Markdown file. 
+```mermaid
+erDiagram
+
+Students ||--|{ StudentPrograms:        "takes"
+Students ||--o{ StudentCompletedCourses: "Completes"
+Students ||--|{ StudentSemesters:       "enrolls in"
+
+Catalogs ||--|{ Students:           "has"
+Catalogs ||--|{ ProgramCatalogs:    "includes"
+
+Programs ||--|{ StudentPrograms:    "has"
+Programs ||--|{ ProgramCourses:     "includes"
+
+Professors ||--|{ Students:     "Advises"
+Professors ||--|{ Courses:      "teaches"
+
+Courses ||--|{ StudentCompletedCourses: "has"
+Courses ||--|{ Classes:                  "can be in"
+Courses ||--|{ ProgramCourses:            "has"
+Courses ||--o{ Courses:                   "prerequisite"
+
+Semesters ||--|{ Classes:                "can have"
+Semesters ||--|{ StudentSemesters:      "has"
+
+Students{
+    int StudentID             PK
+    string StudentFName
+    string StudentLName
+    string StudentEmail
+    int ProfessorID             FK
+
+}
+
+StudentPrograms{
+    int StudentProgramID            PK
+    int StudentID                   FK
+    int ProgramID                   FK
+
+}
+Professors{
+    int ProfessorID             PK
+    string ProfessorFName
+    string ProfessorLName
+    string ProfessorEmail
+}
+
+Catalogs{
+    int CatalogID               PK
+    string CatalogName
+    int CatalogYear
+    string CatalogDescription
+}
+
+ProgramCatalogs{
+    int ProgramCatalogID            PK
+    int CatalogID                   FK
+    int ProgramID                   FK
+}
+
+Programs{
+    int ProgramID               PK
+    String ProgramName
+    string ProgramType
+}
+
+
+ProgramCourses{
+    int ProgramCourseID                PK
+    int ProgramID                       FK
+    int CoursesID                       FK
+}
+
+Courses{
+    int CourseID                    PK
+    string CourseName
+    int prerequisite(CourseID)                FK
+}
+
+StudentCompletedCourses{
+    int StudentCompCourseID           PK
+    int StudentID                       FK
+    int CourseID                     FK
+
+}
+
+StudentSemesters{
+    int StudentSemesterID           PK
+    int StudentID                   FK
+    int SemesterID                  FK
+}
+
+Semesters{
+    int SemesterID                      PK
+    string SemesterName
+    int SemesterStartDate
+    int SemesterEndDate
+
+}
+
+Classes{
+    int ClassID                     PK
+    int SemesterID                  FK
+    int CourseID                    FK
+}
+
+
+```
+
+## DBMS Selection
+
+Decide what DBMS your team will use (SQLite3 or MongoDB). Team 3 must do both.
+```
+  1. SQLite3  (I think that this is way simpler and easy to implement than MongoDB, That's just what I think)
+```
+
+## Questions
+
+Again, document any new questions that arise.
